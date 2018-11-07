@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "cross-env NODE_ENV=development npm-run-all build start-server",
+    "start:prod": "cross-env NODE_ENV=production npm-run-all build start-server",
     "build": "npm-run-all -p build-client build-server",
     "build-client": "webpack --progress --hide-modules",
     "build-server": "cross-env WEBPACK_TARGET=node webpack --progress --hide-modules",
