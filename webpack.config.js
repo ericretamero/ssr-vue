@@ -1,16 +1,27 @@
-const webpack = require('webpack');
-const merge = require('webpack-merge');
-// const baseConfig = require('./webpack.base.config.js');
-const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
 const path = require('path');
+
+const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
+const VueSSRServerPlugin = require('vue-server-renderer/server-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const nodeExternals = require('webpack-node-externals');
+
+const TARGET_NODE = process.env.WEBPACK_TARGET === 'node'
+
+const target = TARGET_NODE
+    ? 'server'
+    : 'client'
 
 module.exports = {
-    entry: './src/entry-client.js',
+    mode: process.env.NODE_ENV,
+    entry: `./src/entry-${target}`,
+    target: TARGET_NODE ? 'node' : 'web',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
-        publicPath: '/dist/'
+        publicPath: '/dist/',
+        libraryTarget: TARGET_NODE
+            ? 'commonjs2'
+            : undefined
     },
     module: {
         rules: [
@@ -25,18 +36,23 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader'
-              },
-              {
+            },
+            {
                 test: /\.css$/,
                 use: [
-                  'vue-style-loader',
-                  'css-loader'
+                    'vue-style-loader',
+                    'css-loader'
                 ],
-              },
+            },
         ]
     },
     plugins: [
-        new VueSSRClientPlugin(),
-        new VueLoaderPlugin()
-    ]
+        new VueLoaderPlugin(),
+        TARGET_NODE
+            ? new VueSSRServerPlugin()
+            : new VueSSRClientPlugin()
+    ],
+    externals: TARGET_NODE ? nodeExternals({
+        whitelist: /\.css$/
+    }) : undefined,
 };

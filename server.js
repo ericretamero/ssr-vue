@@ -22,4 +22,4 @@ server.get('*', (req, res) => {
     });
 });
 
-server.listen(8080);
+server.listen(8080, () => console.log("App listening on port 8080!"));
